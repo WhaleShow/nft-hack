@@ -1,6 +1,9 @@
-# 🐳 WhaleShow - 🎟 Book exclusive shows and trade tickets
+# 🐳 WhaleShow 
+## 🎟 Book exclusive shows and trade NFT tickets
 
 > This is the project submission for NFTHack by @barrasso.
+
+-------------------------------
 
 Built with blubber love using [scaffold-eth](https://github.com/austintgriffith/scaffold-eth) 🏗 💪
 
@@ -10,11 +13,8 @@ required: [Node](https://nodejs.org/dist/latest-v12.x/) plus [Yarn](https://clas
 
 
 ```bash
-git clone https://github.com/austintgriffith/scaffold-eth.git simple-nft-example
+git clone https://github.com/WhaleShow/nft-hack
 
-cd simple-nft-example
-
-git checkout simple-nft-example
 ```
 
 ```bash
