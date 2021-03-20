@@ -1,10 +1,27 @@
-# 🐳 WhaleShow - 🎟 Bid on exclusive shows and trade NFT tickets
+# :whale: WhaleShow 
+## :ticket: Book live shows | :tickets: Trade NFT tickets | :blue_heart: Save the whales
 
 > This is the project submission for NFTHack by @barrasso.
 
--------------------------------
+WhaleShow consists of three core components:
 
-Built with blubber love 💙 using [scaffold-eth](https://github.com/austintgriffith/scaffold-eth) 🏗 💪
+**1. :ticket: Auctions:**
+
+Auctions on WhaleShow are attached to actual live events in the real world. 
+
+The winner of an auction receives ownership rights to the show and non-fungible tickets (NFTs:wink:) that can be redeemed for access to the show. The live show happens on a given date, location, and terms that are mutually agreed upon by the winner and the performer. 
+
+Each show auction has a built-in reserve price to cover the performer's expenses such as flights, accomodations, soundchecks, etc.
+
+Best of all, a portion of the revenue generated from each show goes to non-profits that are actually saving the whales IRL. (e.g. [The Ocean Cleanup](https://theoceancleanup.com/))
+
+**2. :tickets: Trading:**
+
+Tickets can also be bought, sold, and traded on the marketplace.
+
+**3. :ballot_box: Proposals:**
+
+New ideas for shows can be proposed and voted on by the community.
 
 -------------------------------
 
@@ -43,4 +60,8 @@ yarn deploy
 
 📱 Open http://localhost:3000 to see the app
 
+-------------------------------
 
+Built with blubber love 💙 using [scaffold-eth](https://github.com/austintgriffith/scaffold-eth) 🏗 💪
+
+-------------------------------
