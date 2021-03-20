@@ -52,6 +52,12 @@ yarn chain
 ```
 
 > in a third terminal window:
+> 
+
+```bash
+yarn upload
+
+```
 
 ```bash
 yarn deploy
