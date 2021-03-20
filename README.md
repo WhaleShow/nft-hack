@@ -1,11 +1,14 @@
 # 🐳 WhaleShow 
-## 🎟 Book exclusive shows and trade NFT tickets
+
+🎟 Book exclusive shows and trade NFT tickets
 
 > This is the project submission for NFTHack by @barrasso.
 
 -------------------------------
 
-Built with blubber love using [scaffold-eth](https://github.com/austintgriffith/scaffold-eth) 🏗 💪
+Built with blubber love 💙 using [scaffold-eth](https://github.com/austintgriffith/scaffold-eth) 🏗 💪
+
+-------------------------------
 
 ## 🏃‍♀️ Quick Start
 
@@ -32,7 +35,6 @@ yarn start
 > in a second terminal window:
 
 ```bash
-cd simple-nft-example
 yarn chain
 
 ```
@@ -40,7 +42,6 @@ yarn chain
 > in a third terminal window:
 
 ```bash
-cd simple-nft-example
 yarn deploy
 
 ```
