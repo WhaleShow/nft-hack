@@ -100,7 +100,7 @@ const checkBalances = async (address) => {
   for (let n in NETWORKS) {
     let tempProvider = new JsonRpcProvider(NETWORKS[n].rpcUrl);
     let tempBalance = await tempProvider.getBalance(address);
-    let result = tempBalance && tempBalance.toNumber()
+    let result = tempBalance && formatEther(tempBalance)
     if (result != 0) {
       console.log("Found a balance in ", n)
       window.localStorage.setItem("network", n);
@@ -156,6 +156,20 @@ function App(props) {
       }
     }
   }, 7777)
+  setTimeout(() => {
+    if (!cachedNetwork) {
+      if (balance == 0) {
+        checkBalances(address)
+      }
+    }
+  }, 1777)
+  setTimeout(() => {
+    if (!cachedNetwork) {
+      if (balance == 0) {
+        checkBalances(address)
+      }
+    }
+  }, 3777)
 
   // Just plug in different 🛰 providers to get your balance on different chains:
   const yourMainnetBalance = useBalance(mainnetProvider, address);
@@ -442,7 +456,6 @@ function App(props) {
 
       <div style={{ padding: 16, cursor: "pointer", backgroundColor: "#FFFFFF", width: 420, margin: "auto" }}>
         <QRPunkBlockie withQr={true} address={address} />
-        <p>{address}</p>
       </div>
 
       <div style={{ position: "relative", width: 320, margin: "auto", textAlign: "center", marginTop: 32 }}>
@@ -618,7 +631,7 @@ function App(props) {
         </Switch>
       </BrowserRouter>
 
-      <ThemeSwitch />
+      {/* <ThemeSwitch /> */}
 
       <div style={{ zIndex: -1, padding: 64, opacity: 0.5, fontSize: 12 }}>
         created with <span style={{ marginRight: 4 }}>🏗</span><a href="https://github.com/austintgriffith/scaffold-eth#-scaffold-eth" target="_blank">scaffold-eth</a>

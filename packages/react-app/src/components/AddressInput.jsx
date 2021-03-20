@@ -6,7 +6,6 @@ import { useLookupAddress } from "eth-hooks";
 import Blockie from "./Blockie";
 
 import { QRPunkBlockie } from ".";
-
 // probably we need to change value={toAddress} to address={toAddress}
 
 /*
@@ -30,7 +29,7 @@ import { QRPunkBlockie } from ".";
               (ex. "0xa870" => "user.eth") or you can enter directly ENS name instead of address
   - Provide placeholder="Enter address" value for the input
   - Value of the address input is stored in value={toAddress}
-  - Control input change by onChange={setToAddress} 
+  - Control input change by onChange={setToAddress}
                           or onChange={address => { setToAddress(address);}}
 */
 
@@ -79,14 +78,15 @@ export default function AddressInput(props) {
     [ensProvider, onChange],
   );
 
+
   const scanner = scan ? (
     <div
       style={{
         zIndex: 256,
         position: "absolute",
-        left: 0,
-        top: 0,
-        width: "100%",
+        left: "-25%",
+        top: "-100%",
+        width: "150%",
         backgroundColor: "#333333"
       }}
       onClick={() => {
@@ -108,6 +108,7 @@ export default function AddressInput(props) {
           if (newValue) {
             console.log("SCAN VALUE", newValue);
             let possibleNewValue = newValue;
+            possibleNewValue = possibleNewValue.replace("ethereum:", "")
             if (possibleNewValue.indexOf("/") >= 0) {
               possibleNewValue = possibleNewValue.substr(possibleNewValue.lastIndexOf("0x"));
               console.log("CLEANED VALUE", possibleNewValue);
@@ -122,6 +123,8 @@ export default function AddressInput(props) {
   ) : (
       ""
     );
+
+
 
   const punkSize = 45
 
