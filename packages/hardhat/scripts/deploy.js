@@ -13,16 +13,16 @@ const main = async () => {
   // read in all the assets to get their IPFS hash...
   let uploadedAssets = JSON.parse(fs.readFileSync("./uploaded.json"))
   let bytes32Array = []
-  for(let a in uploadedAssets){
-    console.log(" 🏷 IPFS:",a)
+  for (let a in uploadedAssets) {
+    console.log(" 🏷 IPFS:", a)
     let bytes32 = utils.id(a)
-    console.log(" #️⃣ hashed:",bytes32)
+    console.log(" #️⃣ hashed:", bytes32)
     bytes32Array.push(bytes32)
   }
   console.log(" \n")
 
   // deploy the contract with all the artworks forSale
-  const yourCollectible = await deploy("YourCollectible",[ bytes32Array ]) // <-- add in constructor args like line 19 vvvv
+  const whaleShow = await deploy("WhaleShow", [bytes32Array]) // <-- add in constructor args like line 19 vvvv
 
   //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
   //const secondContract = await deploy("SecondContract")
@@ -86,13 +86,13 @@ const deploy = async (contractName, _args = [], overrides = {}, libraries = {}) 
   console.log(` 🛰  Deploying: ${contractName}`);
 
   const contractArgs = _args || [];
-  const contractArtifacts = await ethers.getContractFactory(contractName,{libraries: libraries});
+  const contractArtifacts = await ethers.getContractFactory(contractName, { libraries: libraries });
   const deployed = await contractArtifacts.deploy(...contractArgs, overrides);
   const encoded = abiEncodeArgs(deployed, contractArgs);
   fs.writeFileSync(`artifacts/${contractName}.address`, deployed.address);
 
   let extraGasInfo = ""
-  if(deployed&&deployed.deployTransaction){
+  if (deployed && deployed.deployTransaction) {
     const gasUsed = deployed.deployTransaction.gasLimit.mul(deployed.deployTransaction.gasPrice)
     extraGasInfo = `${utils.formatEther(gasUsed)} ETH, tx hash ${deployed.deployTransaction.hash}`
   }
@@ -162,12 +162,12 @@ function sleep(ms) {
 }
 
 // If you want to verify on https://tenderly.co/
-const tenderlyVerify = async ({contractName, contractAddress}) => {
+const tenderlyVerify = async ({ contractName, contractAddress }) => {
 
-  let tenderlyNetworks = ["kovan","goerli","mainnet","rinkeby","ropsten","matic","mumbai","xDai","POA"]
+  let tenderlyNetworks = ["kovan", "goerli", "mainnet", "rinkeby", "ropsten", "matic", "mumbai", "xDai", "POA"]
   let targetNetwork = process.env.HARDHAT_NETWORK || config.defaultNetwork
 
-  if(tenderlyNetworks.includes(targetNetwork)) {
+  if (tenderlyNetworks.includes(targetNetwork)) {
     console.log(chalk.blue(` 📁 Attempting tenderly verification of ${contractName} on ${targetNetwork}`))
 
     await tenderly.persistArtifacts({
@@ -176,14 +176,14 @@ const tenderlyVerify = async ({contractName, contractAddress}) => {
     });
 
     let verification = await tenderly.verify({
-        name: contractName,
-        address: contractAddress,
-        network: targetNetwork
-      })
+      name: contractName,
+      address: contractAddress,
+      network: targetNetwork
+    })
 
     return verification
   } else {
-      console.log(chalk.grey(` 🧐 Contract verification not supported on ${targetNetwork}`))
+    console.log(chalk.grey(` 🧐 Contract verification not supported on ${targetNetwork}`))
   }
 }
 

@@ -10,13 +10,13 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 // GET LISTED ON OPENSEA: https://testnets.opensea.io/get-listed/step-two
 
-contract YourCollectible is ERC721Burnable {
+contract WhaleShow is ERC721Burnable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
     constructor(bytes32[] memory assetsForSale)
         public
-        ERC721("YourCollectible", "YCB")
+        ERC721("WhaleShow", "SHOW")
     {
         _setBaseURI("https://ipfs.io/ipfs/");
         for (uint256 i = 0; i < assetsForSale.length; i++) {
