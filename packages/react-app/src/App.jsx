@@ -17,6 +17,7 @@ import { utils } from "ethers";
 import { Hints, ExampleUI, Subgraph } from "./views"
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { INFURA_ID, DAI_ADDRESS, DAI_ABI, NETWORK, NETWORKS } from "./constants";
+import { Collapse } from 'react-collapse';
 import StackGrid from "react-stack-grid";
 import ReactJson from 'react-json-view'
 import assets from './assets.js'
@@ -202,8 +203,6 @@ function App(props) {
   const transferEvents = useEventListener(readContracts, "WhaleShow", "Transfer", localProvider, 1);
   console.log("📟 Transfer events:", transferEvents)
 
-
-
   //
   // 🧠 This effect will update whaleShows by polling when your balance changes
   //
@@ -365,6 +364,10 @@ function App(props) {
   const [transferToAddresses, setTransferToAddresses] = useState({})
 
   const [loadedAssets, setLoadedAssets] = useState()
+
+  // The state of the collapsable menu that contains the punk-wallet's sender functions. 
+  var [isWalletMenuOpened, setMenuOpen] = useState(false);
+
   useEffect(() => {
     const updateWhaleShows = async () => {
       let assetUpdate = []
@@ -429,6 +432,9 @@ function App(props) {
       </Card>
     )
   }
+
+
+
   return (
     <div className="App">
       {networkDisplay}
@@ -458,60 +464,73 @@ function App(props) {
         <QRPunkBlockie withQr={true} address={address} />
       </div>
 
-      <div style={{ position: "relative", width: 320, margin: "auto", textAlign: "center", marginTop: 32 }}>
-        <div style={{ padding: 10 }}>
-          <AddressInput
-            ensProvider={mainnetProvider}
-            placeholder="to address"
-            address={toAddress}
-            onChange={setToAddress}
-          />
-        </div>
-        <div style={{ padding: 10 }}>
-          <EtherInput
-            price={price ? price : targetNetwork.price}
-            value={amount}
-            onChange={value => {
-              setAmount(value);
-            }}
-          />
-        </div>
-        <div style={{ padding: 10 }}>
-          <Button
-            key="submit"
-            type="primary"
-            disabled={loading || !amount || !toAddress}
-            loading={loading}
-            onClick={async () => {
-              setLoading(true)
-
-              let value;
-              try {
-                value = parseEther("" + amount);
-              } catch (e) {
-                let floatVal = parseFloat(amount).toFixed(8)
-                // failed to parseEther, try something else
-                value = parseEther("" + floatVal);
-              }
-
-              let result = tx({
-                to: toAddress,
-                value,
-                gasPrice: gasPrice,
-                gasLimit: 21000
-              });
-              //setToAddress("")
-              setAmount("")
-              result = await result
-              console.log(result)
-              setLoading(false)
-            }}
-          >
-            {loading || !amount || !toAddress ? <CaretUpOutlined /> : <SendOutlined style={{ color: "#FFFFFF" }} />} Send
-          </Button>
-        </div>
-
+      <div style={{ padding: 0 }}>
+        <Button
+          size="small"
+          shape="round"
+          onClick={() => {
+            isWalletMenuOpened = !isWalletMenuOpened
+            setMenuOpen(isWalletMenuOpened)
+          }}>
+          {isWalletMenuOpened ? "▲" : "▼"}
+        </Button>
       </div>
+      <Collapse isOpened={isWalletMenuOpened}>
+        <div style={{ position: "relative", width: 320, margin: "auto", textAlign: "center", marginTop: 32 }}>
+          <div style={{ padding: 10 }}>
+            <AddressInput
+              ensProvider={mainnetProvider}
+              placeholder="Send to address"
+              address={toAddress}
+              onChange={setToAddress}
+            />
+          </div>
+          <div style={{ padding: 10 }}>
+            <EtherInput
+              price={price ? price : targetNetwork.price}
+              value={amount}
+              onChange={value => {
+                setAmount(value);
+              }}
+            />
+          </div>
+          <div style={{ padding: 10 }}>
+            <Button
+              key="submit"
+              type="primary"
+              disabled={loading || !amount || !toAddress}
+              loading={loading}
+              onClick={async () => {
+                setLoading(true)
+
+                let value;
+                try {
+                  value = parseEther("" + amount);
+                } catch (e) {
+                  let floatVal = parseFloat(amount).toFixed(8)
+                  // failed to parseEther, try something else
+                  value = parseEther("" + floatVal);
+                }
+
+                let result = tx({
+                  to: toAddress,
+                  value,
+                  gasPrice: gasPrice,
+                  gasLimit: 21000
+                });
+                //setToAddress("")
+                setAmount("")
+                result = await result
+                console.log(result)
+                setLoading(false)
+              }}
+            >
+              {loading || !amount || !toAddress ? <CaretUpOutlined /> : <SendOutlined style={{ color: "#FFFFFF" }} />} Send
+          </Button>
+          </div>
+        </div>
+      </Collapse>
+
       <BrowserRouter>
 
         <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
