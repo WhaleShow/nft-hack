@@ -5,12 +5,24 @@ const { config, ethers, tenderly, run } = require("hardhat");
 const { utils } = require("ethers");
 const R = require("ramda");
 
+
 const main = async () => {
 
   console.log("\n\n 📡 Deploying...\n");
 
+  // read in all the assets to get their IPFS hash...
+  let uploadedAssets = JSON.parse(fs.readFileSync("./uploaded.json"))
+  let bytes32Array = []
+  for(let a in uploadedAssets){
+    console.log(" 🏷 IPFS:",a)
+    let bytes32 = utils.id(a)
+    console.log(" #️⃣ hashed:",bytes32)
+    bytes32Array.push(bytes32)
+  }
+  console.log(" \n")
 
-  const yourCollectible = await deploy("YourCollectible") // <-- add in constructor args like line 19 vvvv
+  // deploy the contract with all the artworks forSale
+  const yourCollectible = await deploy("YourCollectible",[ bytes32Array ]) // <-- add in constructor args like line 19 vvvv
 
   //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
   //const secondContract = await deploy("SecondContract")
