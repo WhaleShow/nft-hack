@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from "react";
 import QrReader from "react-qr-reader";
 import { CameraOutlined, QrcodeOutlined } from "@ant-design/icons";
-import { Input, Badge } from "antd";
+import { Input, Badge, Spin, message } from "antd";
 import { useLookupAddress } from "eth-hooks";
 import Blockie from "./Blockie";
+
+import { QRPunkBlockie } from ".";
 
 // probably we need to change value={toAddress} to address={toAddress}
 
@@ -33,7 +35,7 @@ import Blockie from "./Blockie";
 */
 
 export default function AddressInput(props) {
-  const [value, setValue] = useState(props.value);
+  const [value, setValue] = useState(props.address);
   const [scan, setScan] = useState(false);
 
   const currentValue = typeof props.value !== "undefined" ? props.value : value;
@@ -46,18 +48,19 @@ export default function AddressInput(props) {
         setScan(!scan);
       }}
     >
-      <Badge count={<CameraOutlined style={{ fontSize: 9 }} />}>
-        <QrcodeOutlined style={{ fontSize: 18 }} />
+      <Badge count={<CameraOutlined style={{ color: "#000000", fontSize: 9 }} />}>
+        <QrcodeOutlined style={{ color: "#000000", fontSize: 18 }} />
       </Badge>{" "}
       Scan
     </div>
   );
 
-  const {ensProvider, onChange} = props;
+  const { ensProvider, onChange } = props;
   const updateAddress = useCallback(
     async newValue => {
       if (typeof newValue !== "undefined") {
         let address = newValue;
+        setValue(address);
         if (address.indexOf(".eth") > 0 || address.indexOf(".xyz") > 0) {
           try {
             const possibleAddress = await ensProvider.resolveName(address);
@@ -65,7 +68,7 @@ export default function AddressInput(props) {
               address = possibleAddress;
             }
             // eslint-disable-next-line no-empty
-          } catch (e) {}
+          } catch (e) { }
         }
         setValue(address);
         if (typeof onChange === "function") {
@@ -84,17 +87,22 @@ export default function AddressInput(props) {
         left: 0,
         top: 0,
         width: "100%",
+        backgroundColor: "#333333"
       }}
       onClick={() => {
         setScan(false);
       }}
     >
+      <div style={{ fontSize: 16, position: "absolute", width: "100%", textAlign: "center", top: "25%", color: "#FFFFFF" }}>
+        <Spin /> connecting to camera...
+      </div>
       <QrReader
         delay={250}
         resolution={1200}
         onError={e => {
           console.log("SCAN ERROR", e);
           setScan(false);
+          message.error("Camera Error: " + e.toString())
         }}
         onScan={newValue => {
           if (newValue) {
@@ -112,19 +120,31 @@ export default function AddressInput(props) {
       />
     </div>
   ) : (
-    ""
-  );
+      ""
+    );
+
+  const punkSize = 45
+
+  let part1 = currentValue && currentValue.substr(2, 20)
+  let part2 = currentValue && currentValue.substr(22)
+  const x = parseInt(part1, 16) % 100
+  const y = parseInt(part2, 16) % 100
 
   return (
     <div>
+
+      <div style={{ position: "absolute", left: -202, top: -88 }}>
+        {currentValue && currentValue.length > 41 ? <QRPunkBlockie scale={0.6} address={currentValue} /> : ""}
+      </div>
+
       {scanner}
+
       <Input
         id={"0xAddress"}//name it something other than address for auto fill doxxing
         name={"0xAddress"}//name it something other than address for auto fill doxxing
         autoComplete="off"
         autoFocus={props.autoFocus}
         placeholder={props.placeholder ? props.placeholder : "address"}
-        prefix={<Blockie address={currentValue} size={8} scale={3} />}
         value={ens || currentValue}
         addonAfter={scannerButton}
         onChange={e => {

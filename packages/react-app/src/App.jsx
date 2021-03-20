@@ -2,14 +2,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
 import "antd/dist/antd.css";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
-import { LinkOutlined } from "@ant-design/icons"
+import { SendOutlined, CaretUpOutlined, HistoryOutlined } from "@ant-design/icons";
 import "./App.css";
-import { Row, Col, Button, Menu, Alert, Input, List, Card, Switch as SwitchD } from "antd";
+import { Select, Row, Col, Button, Menu, Alert, Spin, List, Card, Switch as SwitchD } from "antd";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useUserAddress } from "eth-hooks";
-import { useExchangePrice, useGasPrice, useUserProvider, useContractLoader, useContractReader, useEventListener, useBalance, useExternalContractLoader } from "./hooks";
-import { Header, Account, Faucet, Ramp, Contract, GasGauge, Address, AddressInput, ThemeSwitch } from "./components";
+import { usePoller, useExchangePrice, useGasPrice, useUserProvider, useContractLoader, useContractReader, useEventListener, useBalance, useExternalContractLoader } from "./hooks";
+import { Header, Account, Faucet, Ramp, Contract, GasGauge, Address, AddressInput, EtherInput, Balance, ThemeSwitch, QRPunkBlockie } from "./components";
 import { Transactor } from "./helpers";
 import { formatEther, parseEther } from "@ethersproject/units";
 import { utils } from "ethers";
@@ -20,6 +20,7 @@ import { INFURA_ID, DAI_ADDRESS, DAI_ABI, NETWORK, NETWORKS } from "./constants"
 import StackGrid from "react-stack-grid";
 import ReactJson from 'react-json-view'
 import assets from './assets.js'
+const { ethers } = require("ethers");
 
 const { BufferList } = require('bl')
 // https://www.npmjs.com/package/ipfs-http-client
@@ -49,28 +50,14 @@ console.log("📦 Assets: ", assets)
 
 
 /// 📡 What chain are your contracts deployed to?
+const cachedNetwork = window.localStorage.getItem("network")
 const targetNetwork = NETWORKS['localhost']; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+if (!targetNetwork) {
+  targetNetwork = NETWORKS['localhost'];
+}
 
 // 😬 Sorry for all the console logging
 const DEBUG = true
-
-//EXAMPLE STARTING JSON:
-const STARTING_JSON = {
-  "description": "It's actually a bison?",
-  "external_url": "https://austingriffith.com/portfolio/paintings/",// <-- this can link to a page for the specific file too
-  "image": "https://austingriffith.com/images/paintings/buffalo.jpg",
-  "name": "Buffalo",
-  "attributes": [
-    {
-      "trait_type": "BackgroundColor",
-      "value": "green"
-    },
-    {
-      "trait_type": "Eyes",
-      "value": "googly"
-    }
-  ]
-}
 
 //helper function to "Get" from IPFS
 // you usually go content.toString() after this...
@@ -108,6 +95,21 @@ const localProvider = new JsonRpcProvider(localProviderUrlFromEnv);
 // 🔭 block explorer URL
 const blockExplorer = targetNetwork.blockExplorer;
 
+// a function to check your balance on every network and switch networks if found...
+const checkBalances = async (address) => {
+  for (let n in NETWORKS) {
+    let tempProvider = new JsonRpcProvider(NETWORKS[n].rpcUrl);
+    let tempBalance = await tempProvider.getBalance(address);
+    let result = tempBalance && tempBalance.toNumber()
+    if (result != 0) {
+      console.log("Found a balance in ", n)
+      window.localStorage.setItem("network", n);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1);
+    }
+  }
+}
 
 function App(props) {
 
@@ -144,6 +146,17 @@ function App(props) {
   const yourLocalBalance = useBalance(localProvider, address);
   if (DEBUG) console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...")
 
+  const mainBalance = yourLocalBalance && formatEther(yourLocalBalance)
+
+  //if you don't have any money, scan the other networks for money
+  usePoller(() => {
+    if (!cachedNetwork) {
+      if (mainBalance == 0) {
+        checkBalances(address)
+      }
+    }
+  }, 7777)
+
   // Just plug in different 🛰 providers to get your balance on different chains:
   const yourMainnetBalance = useBalance(mainnetProvider, address);
   if (DEBUG) console.log("💵 yourMainnetBalance", yourMainnetBalance ? formatEther(yourMainnetBalance) : "...")
@@ -156,15 +169,15 @@ function App(props) {
   const writeContracts = useContractLoader(userProvider)
   if (DEBUG) console.log("🔐 writeContracts", writeContracts)
 
-  // EXTERNAL CONTRACT EXAMPLE:
-  //
-  // If you want to bring in the mainnet DAI contract it would look like:
-  const mainnetDAIContract = useExternalContractLoader(mainnetProvider, DAI_ADDRESS, DAI_ABI)
-  console.log("🌍 DAI contract on mainnet:", mainnetDAIContract)
-  //
-  // Then read your DAI balance like:
-  const myMainnetDAIBalance = useContractReader({ DAI: mainnetDAIContract }, "DAI", "balanceOf", ["0x34aA3F359A9D614239015126635CE7732c18fDF3"])
-  console.log("🥇 myMainnetDAIBalance:", myMainnetDAIBalance)
+  // // EXTERNAL CONTRACT EXAMPLE:
+  // //
+  // // If you want to bring in the mainnet DAI contract it would look like:
+  // const mainnetDAIContract = useExternalContractLoader(mainnetProvider, DAI_ADDRESS, DAI_ABI)
+  // console.log("🌍 DAI contract on mainnet:", mainnetDAIContract)
+  // //
+  // // Then read your DAI balance like:
+  // const myMainnetDAIBalance = useContractReader({ DAI: mainnetDAIContract }, "DAI", "balanceOf", ["0x34aA3F359A9D614239015126635CE7732c18fDF3"])
+  // console.log("🥇 myMainnetDAIBalance:", myMainnetDAIBalance)
 
 
   // keep track of a variable from the contract in the local React state:
@@ -221,12 +234,26 @@ function App(props) {
   let networkDisplay = ""
   if (localChainId && selectedChainId && localChainId != selectedChainId) {
     networkDisplay = (
-      <div style={{ zIndex: 2, position: 'absolute', right: 0, top: 60, padding: 16 }}>
+      <div style={{ zIndex: 2, position: 'absolute', right: 0, top: 0, padding: 18 }}>
         <Alert
           message={"⚠️ Wrong Network"}
           description={(
             <div>
-              You have <b>{NETWORK(selectedChainId).name}</b> selected and you need to be on <b>{NETWORK(localChainId).name}</b>.
+              You have <b>{NETWORK(selectedChainId).name}</b> selected and you need to be on <Button onClick={async () => {
+                let ethereum = window.ethereum;
+                const data = [{
+                  chainId: "0x" + targetNetwork.chainId.toString(16),
+                  chainName: targetNetwork.name,
+                  nativeCurrency: targetNetwork.nativeCurrency,
+                  rpcUrls: [targetNetwork.rpcUrl],
+                  blockExplorerUrls: [targetNetwork.blockExplorer],
+                }]
+                console.log("data", data)
+                const tx = await ethereum.request({ method: 'wallet_addEthereumChain', params: data }).catch()
+                if (tx) {
+                  console.log(tx)
+                }
+              }}>{NETWORK(localChainId).name}</Button>.
             </div>
           )}
           type="error"
@@ -234,13 +261,29 @@ function App(props) {
         />
       </div>
     )
-  } else {
-    networkDisplay = (
-      <div style={{ zIndex: -1, position: 'absolute', right: 154, top: 28, padding: 16, color: targetNetwork.color }}>
-        {targetNetwork.name}
-      </div>
+  }
+
+  let options = []
+  for (let id in NETWORKS) {
+    options.push(
+      <Select.Option key={id} value={NETWORKS[id].name}><span style={{ color: NETWORKS[id].color }}>
+        {NETWORKS[id].name}
+      </span></Select.Option>
     )
   }
+
+  const networkSelect = (
+    <Select defaultValue={targetNetwork.name} style={{ textAlign: "left", width: 120 }} onChange={(value) => {
+      if (targetNetwork.chainId != NETWORKS[value].chainId) {
+        window.localStorage.setItem("network", value);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1);
+      }
+    }}>
+      {options}
+    </Select>
+  )
 
   const loadWeb3Modal = useCallback(async () => {
     const provider = await web3Modal.connect();
@@ -259,7 +302,7 @@ function App(props) {
   }, [setRoute]);
 
   let faucetHint = ""
-  const faucetAvailable = localProvider && localProvider.connection && localProvider.connection.url && localProvider.connection.url.indexOf(window.location.hostname) >= 0 && !process.env.REACT_APP_PROVIDER && price > 1;
+  const faucetAvailable = localProvider && localProvider.connection && localProvider.connection.url && localProvider.connection.url.indexOf("localhost") >= 0 && !process.env.REACT_APP_PROVIDER && price > 1;
 
   const [faucetClicked, setFaucetClicked] = useState(false);
   if (!faucetClicked && localProvider && localProvider._network && localProvider._network.chainId == 31337 && yourLocalBalance && formatEther(yourLocalBalance) <= 0) {
@@ -278,14 +321,32 @@ function App(props) {
     )
   }
 
+  let startingAddress = ""
+  if (window.location.pathname) {
+    let incoming = window.location.pathname.replace("/", "")
+    if (incoming && ethers.utils.isAddress(incoming)) {
+      startingAddress = incoming
+      window.history.pushState({}, "", "/");
+    }
 
-  const [yourJSON, setYourJSON] = useState(STARTING_JSON);
-  const [sending, setSending] = useState()
-  const [ipfsHash, setIpfsHash] = useState()
-  const [ipfsDownHash, setIpfsDownHash] = useState()
+    /*let rawPK
+    if(incomingPK.length===64||incomingPK.length===66){
+      console.log("🔑 Incoming Private Key...");
+      rawPK=incomingPK
+      burnerConfig.privateKey = rawPK
+      window.history.pushState({},"", "/");
+      let currentPrivateKey = window.localStorage.getItem("metaPrivateKey");
+      if(currentPrivateKey && currentPrivateKey!==rawPK){
+        window.localStorage.setItem("metaPrivateKey_backup"+Date.now(),currentPrivateKey);
+      }
+      window.localStorage.setItem("metaPrivateKey",rawPK);
+    }*/
+  }
+  //console.log("startingAddress",startingAddress)
+  const [amount, setAmount] = useState();
+  const [toAddress, setToAddress] = useState(startingAddress);
 
-  const [downloading, setDownloading] = useState()
-  const [ipfsContent, setIpfsContent] = useState()
+  const [loading, setLoading] = useState(false);
 
   const [transferToAddresses, setTransferToAddresses] = useState({})
 
@@ -343,7 +404,7 @@ function App(props) {
         actions={cardActions}
         title={(
           <div>
-            {loadedAssets[a].name} <a style={{ cursor: "pointer", opacity: 0.33 }} href={loadedAssets[a].external_url} target="_blank"><LinkOutlined /></a>
+            {loadedAssets[a].name} <a style={{ cursor: "pointer", opacity: 0.33 }} href={loadedAssets[a].external_url} target="_blank"></a>
           </div>
         )}
       >
@@ -354,14 +415,90 @@ function App(props) {
       </Card>
     )
   }
-
   return (
     <div className="App">
-
-      {/* ✏️ Edit the header and change the title to your project name */}
-      <Header />
       {networkDisplay}
+      <div style={{ float: "left" }}>
+        <Header />
+      </div>
+      <div style={{ float: "right", padding: 16 }}>
+        {address ? (
+          <div>
+            <Address address={address} ensProvider={mainnetProvider} blockExplorer={blockExplorer} />
+            <Button
+              key="history"
+              type="text"
+              onClick={async () => {
+                window.open("https://zapper.fi/transactions?address=" + address)
+              }}
+            ><HistoryOutlined /></Button>
+          </div>
+        ) : <Spin />}
+      </div>
 
+      <div style={{ clear: "both", opacity: yourLocalBalance ? 1 : 0.2, width: 360, margin: "auto" }}>
+        <Balance value={yourLocalBalance} size={36} price={price} /><span style={{ verticalAlign: "middle" }}>{networkSelect}</span>
+      </div>
+
+      <div style={{ padding: 16, cursor: "pointer", backgroundColor: "#FFFFFF", width: 420, margin: "auto" }}>
+        <QRPunkBlockie withQr={true} address={address} />
+        <p>{address}</p>
+      </div>
+
+      <div style={{ position: "relative", width: 320, margin: "auto", textAlign: "center", marginTop: 32 }}>
+        <div style={{ padding: 10 }}>
+          <AddressInput
+            ensProvider={mainnetProvider}
+            placeholder="to address"
+            address={toAddress}
+            onChange={setToAddress}
+          />
+        </div>
+        <div style={{ padding: 10 }}>
+          <EtherInput
+            price={price ? price : targetNetwork.price}
+            value={amount}
+            onChange={value => {
+              setAmount(value);
+            }}
+          />
+        </div>
+        <div style={{ padding: 10 }}>
+          <Button
+            key="submit"
+            type="primary"
+            disabled={loading || !amount || !toAddress}
+            loading={loading}
+            onClick={async () => {
+              setLoading(true)
+
+              let value;
+              try {
+                value = parseEther("" + amount);
+              } catch (e) {
+                let floatVal = parseFloat(amount).toFixed(8)
+                // failed to parseEther, try something else
+                value = parseEther("" + floatVal);
+              }
+
+              let result = tx({
+                to: toAddress,
+                value,
+                gasPrice: gasPrice,
+                gasLimit: 21000
+              });
+              //setToAddress("")
+              setAmount("")
+              result = await result
+              console.log(result)
+              setLoading(false)
+            }}
+          >
+            {loading || !amount || !toAddress ? <CaretUpOutlined /> : <SendOutlined style={{ color: "#FFFFFF" }} />} Send
+          </Button>
+        </div>
+
+      </div>
       <BrowserRouter>
 
         <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
@@ -374,12 +511,6 @@ function App(props) {
           <Menu.Item key="/transfers">
             <Link onClick={() => { setRoute("/transfers") }} to="/transfers">Transfers</Link>
           </Menu.Item>
-          <Menu.Item key="/ipfsup">
-            <Link onClick={() => { setRoute("/ipfsup") }} to="/ipfsup">IPFS Upload</Link>
-          </Menu.Item>
-          <Menu.Item key="/ipfsdown">
-            <Link onClick={() => { setRoute("/ipfsdown") }} to="/ipfsdown">IPFS Download</Link>
-          </Menu.Item>
           <Menu.Item key="/debugcontracts">
             <Link onClick={() => { setRoute("/debugcontracts") }} to="/debugcontracts">Debug Contracts</Link>
           </Menu.Item>
@@ -387,11 +518,6 @@ function App(props) {
 
         <Switch>
           <Route exact path="/">
-            {/*
-                🎛 this scaffolding is full of commonly used components
-                this <Contract/> component will automatically parse your ABI
-                and give you a form to interact with it locally
-            */}
 
             <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 256 }}>
               <StackGrid
@@ -480,67 +606,6 @@ function App(props) {
             </div>
           </Route>
 
-          <Route path="/ipfsup">
-            <div style={{ paddingTop: 32, width: 740, margin: "auto", textAlign: "left" }}>
-              <ReactJson
-                style={{ padding: 8 }}
-                src={yourJSON}
-                theme={"pop"}
-                enableClipboard={false}
-                onEdit={(edit, a) => {
-                  setYourJSON(edit.updated_src)
-                }}
-                onAdd={(add, a) => {
-                  setYourJSON(add.updated_src)
-                }}
-                onDelete={(del, a) => {
-                  setYourJSON(del.updated_src)
-                }}
-              />
-            </div>
-
-            <Button style={{ margin: 8 }} loading={sending} size="large" shape="round" type="primary" onClick={async () => {
-              console.log("UPLOADING...", yourJSON)
-              setSending(true)
-              setIpfsHash()
-              const result = await ipfs.add(JSON.stringify(yourJSON))//addToIPFS(JSON.stringify(yourJSON))
-              if (result && result.path) {
-                setIpfsHash(result.path)
-              }
-              setSending(false)
-              console.log("RESULT:", result)
-            }}>Upload to IPFS</Button>
-
-            <div style={{ padding: 16, paddingBottom: 150 }}>
-              {ipfsHash}
-            </div>
-
-          </Route>
-          <Route path="/ipfsdown">
-            <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
-              <Input
-                value={ipfsDownHash}
-                placeHolder={"IPFS hash (like QmadqNw8zkdrrwdtPFK1pLi8PPxmkQ4pDJXY8ozHtz6tZq)"}
-                onChange={(e) => {
-                  setIpfsDownHash(e.target.value)
-                }}
-              />
-            </div>
-            <Button style={{ margin: 8 }} loading={sending} size="large" shape="round" type="primary" onClick={async () => {
-              console.log("DOWNLOADING...", ipfsDownHash)
-              setDownloading(true)
-              setIpfsContent()
-              const result = await getFromIPFS(ipfsDownHash)//addToIPFS(JSON.stringify(yourJSON))
-              if (result && result.toString) {
-                setIpfsContent(result.toString())
-              }
-              setDownloading(false)
-            }}>Download from IPFS</Button>
-
-            <pre style={{ padding: 16, width: 500, margin: "auto", paddingBottom: 150 }}>
-              {ipfsContent}
-            </pre>
-          </Route>
           <Route path="/debugcontracts">
             <Contract
               name="WhaleShow"
@@ -555,9 +620,14 @@ function App(props) {
 
       <ThemeSwitch />
 
+      <div style={{ zIndex: -1, padding: 64, opacity: 0.5, fontSize: 12 }}>
+        created with <span style={{ marginRight: 4 }}>🏗</span><a href="https://github.com/austintgriffith/scaffold-eth#-scaffold-eth" target="_blank">scaffold-eth</a>
+      </div>
+      <div style={{ padding: 32 }}>
+      </div>
 
       {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
-      <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
+      <div style={{ position: "fixed", textAlign: "right", right: 0, bottom: 16, padding: 10 }}>
         <Account
           address={address}
           localProvider={localProvider}
@@ -570,6 +640,7 @@ function App(props) {
           blockExplorer={blockExplorer}
         />
         {faucetHint}
+        {networkDisplay}
       </div>
 
       {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}

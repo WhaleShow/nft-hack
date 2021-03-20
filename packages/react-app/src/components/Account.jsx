@@ -83,12 +83,10 @@ export default function Account({
   const display = minimized ? (
     ""
   ) : (
-    <span>
-      {address ? <Address address={address} ensProvider={mainnetProvider} blockExplorer={blockExplorer} /> : "Connecting..."}
-      <Balance address={address} provider={localProvider} price={price} />
-      <Wallet address={address} provider={userProvider} ensProvider={mainnetProvider} price={price} />
-    </span>
-  );
+      <span>
+        <Wallet address={address} provider={userProvider} ensProvider={mainnetProvider} price={price} />
+      </span>
+    );
 
   return (
     <div>

@@ -58,7 +58,7 @@ export default function Faucet(props) {
               address = possibleAddress;
             }
             // eslint-disable-next-line no-empty
-          } catch (e) {}
+          } catch (e) { }
         }
         setAddress(address);
       }
@@ -93,7 +93,7 @@ export default function Faucet(props) {
               shape="circle"
               icon={<SendOutlined />}
             />
-            <Wallet color="#888888" provider={props.localProvider} ensProvider={props.ensProvider} price={props.price} />
+            {/* <Wallet color="#888888" provider={props.localProvider} ensProvider={props.ensProvider} price={props.price} /> */}
           </Tooltip>
         }
       />
