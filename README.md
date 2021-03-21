@@ -9,7 +9,7 @@ WhaleShow consists of three core components:
 
 Auctions on WhaleShow are attached to actual live events in the real world. 
 
-The winner of an auction receives ownership rights to the show and non-fungible tickets (NFTs:wink:) that can be redeemed for access to the show. The live show happens on a given date, location, and terms that are mutually agreed upon by the winner and the performer. 
+The winner of an auction receives ownership rights to the show and can mint non-fungible tickets (NFTs:wink:) that can be redeemed for access to the show. The live show happens on a given date, location, and terms that are mutually agreed upon by the winner and the performer. 
 
 **2. :tickets: Trading:**
 
