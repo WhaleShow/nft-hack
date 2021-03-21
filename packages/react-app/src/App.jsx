@@ -452,15 +452,17 @@ function App(props) {
                 window.open("https://zapper.fi/transactions?address=" + address)
               }}
             ><HistoryOutlined /></Button>
+            <span style={{ verticalAlign: "middle" }}>{networkSelect}</span>
+
           </div>
         ) : <Spin />}
       </div>
 
       <div style={{ clear: "both", opacity: yourLocalBalance ? 1 : 0.2, width: 360, margin: "auto" }}>
-        <Balance value={yourLocalBalance} size={36} price={price} /><span style={{ verticalAlign: "middle" }}>{networkSelect}</span>
+        <Balance value={yourLocalBalance} size={36} price={price} />
       </div>
 
-      <div style={{ padding: 16, cursor: "pointer", backgroundColor: "#FFFFFF", width: 420, margin: "auto" }}>
+      <div style={{ padding: 16, cursor: "pointer", backgroundColor: "transparent", width: 420, margin: "auto" }}>
         <QRPunkBlockie withQr={true} address={address} />
       </div>
 
@@ -533,18 +535,21 @@ function App(props) {
 
       <BrowserRouter>
 
-        <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
+        <Menu style={{ textAlign: "center", backgroundColor: "transparent" }} selectedKeys={[route]} mode="horizontal">
           <Menu.Item key="/">
-            <Link onClick={() => { setRoute("/") }} to="/">Shows</Link>
+            <Link onClick={() => { setRoute("/") }} to="/">Whale Shows</Link>
           </Menu.Item>
-          <Menu.Item key="/owned">
-            <Link onClick={() => { setRoute("/owned") }} to="/owned">Owned</Link>
+          <Menu.Item key="/myshows">
+            <Link onClick={() => { setRoute("/myshows") }} to="/myshows">My Shows</Link>
           </Menu.Item>
-          <Menu.Item key="/transfers">
-            <Link onClick={() => { setRoute("/transfers") }} to="/transfers">Transfers</Link>
+          <Menu.Item key="/mytransfers">
+            <Link onClick={() => { setRoute("/mytransferss") }} to="/mytransfers">My Transfers</Link>
           </Menu.Item>
-          <Menu.Item key="/debugcontracts">
-            <Link onClick={() => { setRoute("/debugcontracts") }} to="/debugcontracts">Debug Contracts</Link>
+          <Menu.Item key="/marketplace">
+            <Link onClick={() => { setRoute("/marketplace") }} to="/marketplace">Marketplace</Link>
+          </Menu.Item>
+          <Menu.Item key="/proposals">
+            <Link onClick={() => { setRoute("/proposals") }} to="/proposals">Proposals</Link>
           </Menu.Item>
         </Menu>
 
@@ -563,7 +568,7 @@ function App(props) {
 
           </Route>
 
-          <Route path="/owned">
+          <Route path="/myshows">
             <div style={{ width: 640, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
               <List
                 bordered
@@ -612,7 +617,7 @@ function App(props) {
             </div>
           </Route>
 
-          <Route path="/transfers">
+          <Route path="/mytransfers">
             <div style={{ width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
               <List
                 bordered
@@ -638,7 +643,7 @@ function App(props) {
             </div>
           </Route>
 
-          <Route path="/debugcontracts">
+          <Route path="/proposal">
             <Contract
               name="WhaleShow"
               signer={userProvider.getSigner()}
@@ -652,8 +657,8 @@ function App(props) {
 
       {/* <ThemeSwitch /> */}
 
-      <div style={{ zIndex: -1, padding: 64, opacity: 0.5, fontSize: 12 }}>
-        created with <span style={{ marginRight: 4 }}>🏗</span><a href="https://github.com/austintgriffith/scaffold-eth#-scaffold-eth" target="_blank">scaffold-eth</a>
+      <div style={{ zIndex: -1, padding: 64, opacity: 0.5, fontSize: 12, color: "#333" }}>
+        created with <span style={{ marginRight: 4 }}>🐳</span><a href="https://github.com/austintgriffith/scaffold-eth#-scaffold-eth" target="_blank">scaffold-eth</a>
       </div>
       <div style={{ padding: 32 }}>
       </div>
