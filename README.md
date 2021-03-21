@@ -11,8 +11,6 @@ Auctions on WhaleShow are attached to actual live events in the real world.
 
 The winner of an auction receives ownership rights to the show and non-fungible tickets (NFTs:wink:) that can be redeemed for access to the show. The live show happens on a given date, location, and terms that are mutually agreed upon by the winner and the performer. 
 
-Best of all, a portion of the revenue generated from each show goes to non-profits that are actually saving the whales IRL. (e.g. [The Ocean Cleanup](https://theoceancleanup.com/))
-
 **2. :tickets: Trading:**
 
 Tickets can also be bought, sold, and traded on the marketplace.
