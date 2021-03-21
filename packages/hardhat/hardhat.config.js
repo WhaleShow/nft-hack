@@ -21,7 +21,7 @@ const { isAddress, getAddress, formatUnits, parseUnits } = utils;
 //
 // Select the network you want to deploy to here:
 //
-const defaultNetwork = "localhost";
+const defaultNetwork = "rinkeby";
 
 function mnemonic() {
   try {
@@ -52,7 +52,7 @@ module.exports = {
       */
     },
     rinkeby: {
-      url: "http://rinkeby.dappnode:8545",
+      url: "https://rinkeby.infura.io/v3/9c8358f8e6554cdebf773ecdf1208108",
       accounts: {
         mnemonic: mnemonic(),
       },

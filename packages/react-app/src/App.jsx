@@ -52,9 +52,9 @@ console.log("📦 Assets: ", assets)
 
 /// 📡 What chain are your contracts deployed to?
 const cachedNetwork = window.localStorage.getItem("network")
-const targetNetwork = NETWORKS['localhost']; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const targetNetwork = NETWORKS['rinkeby']; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 if (!targetNetwork) {
-  targetNetwork = NETWORKS['localhost'];
+  targetNetwork = NETWORKS['rinkeby'];
 }
 
 // 😬 Sorry for all the console logging
